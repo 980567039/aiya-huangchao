@@ -1,0 +1,10 @@
+{
+  "version": "0.1",
+  "factions": [
+    {"id":"imperial","name":"皇权","satisfaction":70,"influence":100},
+    {"id":"gentry","name":"士族","satisfaction":65,"influence":80},
+    {"id":"military","name":"武将","satisfaction":60,"influence":65},
+    {"id":"peasants","name":"百姓","satisfaction":65,"influence":100},
+    {"id":"landlords","name":"豪强","satisfaction":60,"influence":70}
+  ]
+}
