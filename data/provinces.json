@@ -1,0 +1,10 @@
+{
+  "version": "0.1",
+  "provinces": [
+    {"id":"north_shuo","name":"北朔州","population":70,"food":45,"treasury":35,"security":65,"morale":55,"gentry_influence":35,"landlord_influence":45,"garrison":25,"corruption":35,"local_loyalty":70},
+    {"id":"he_dong","name":"河东州","population":90,"food":65,"treasury":50,"security":60,"morale":60,"gentry_influence":50,"landlord_influence":45,"garrison":20,"corruption":40,"local_loyalty":70},
+    {"id":"central","name":"中州","population":120,"food":70,"treasury":65,"security":60,"morale":60,"gentry_influence":75,"landlord_influence":55,"garrison":15,"corruption":45,"local_loyalty":75},
+    {"id":"jiangnan","name":"江南州","population":130,"food":95,"treasury":100,"security":75,"morale":70,"gentry_influence":85,"landlord_influence":80,"garrison":10,"corruption":35,"local_loyalty":70},
+    {"id":"lingnan","name":"岭南州","population":80,"food":75,"treasury":75,"security":55,"morale":55,"gentry_influence":50,"landlord_influence":75,"garrison":10,"corruption":50,"local_loyalty":60}
+  ]
+}
