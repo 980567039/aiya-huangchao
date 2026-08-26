@@ -1,0 +1,57 @@
+{
+  "version": "0.2",
+  "routes": [
+    {
+      "id": "benevolence",
+      "name": "仁政",
+      "fantasy": "让天下愿意跟随皇帝",
+      "skills": [
+        {"id":"benevolence_loving_people","tier":1,"type":"passive","name":"爱民如子"},
+        {"id":"benevolence_lenient","tier":1,"type":"passive","name":"宽以待人"},
+        {"id":"benevolence_common_good","tier":2,"type":"active","name":"天下共济","cooldown_months":12},
+        {"id":"benevolence_light_tax","tier":2,"type":"active","name":"轻徭薄赋","duration_months":3},
+        {"id":"benevolence_grain_tax","tier":3,"type":"active","name":"以粮代税"},
+        {"id":"benevolence_unity","tier":4,"type":"ultimate","name":"天下归心","cooldown_months":36,"duration_months":6}
+      ]
+    },
+    {
+      "id": "centralization",
+      "name": "集权",
+      "fantasy": "天下的事，只有朕说了算",
+      "skills": [
+        {"id":"centralization_imperial_command","tier":1,"type":"passive","name":"皇命如山"},
+        {"id":"centralization_inspector","tier":2,"type":"active","name":"钦差巡按"},
+        {"id":"centralization_secret_memorial","tier":2,"type":"passive","name":"密奏制度"},
+        {"id":"centralization_civil_military","tier":3,"type":"active","name":"军政分离"},
+        {"id":"centralization_direct_rule","tier":3,"type":"active","name":"中央直辖"},
+        {"id":"centralization_absolute","tier":4,"type":"ultimate","name":"天威独断","cooldown_months":36,"duration_months":3}
+      ]
+    },
+    {
+      "id": "tyranny",
+      "name": "暴政",
+      "fantasy": "不愿意给，那朕就自己拿",
+      "skills": [
+        {"id":"tyranny_iron_fist","tier":1,"type":"passive","name":"铁腕"},
+        {"id":"tyranny_forced_tax","tier":2,"type":"active","name":"强行征税","cooldown_months":12},
+        {"id":"tyranny_confiscation","tier":2,"type":"active","name":"抄没家产"},
+        {"id":"tyranny_forced_grain","tier":3,"type":"active","name":"强征军粮"},
+        {"id":"tyranny_collective_punishment","tier":3,"type":"active","name":"株连九族"},
+        {"id":"tyranny_terror","tier":4,"type":"ultimate","name":"天威如狱","cooldown_months":36,"duration_months":6}
+      ]
+    },
+    {
+      "id": "militarism",
+      "name": "强兵",
+      "fantasy": "以百万雄兵定天下",
+      "skills": [
+        {"id":"militarism_recruitment","tier":1,"type":"passive","name":"募兵令"},
+        {"id":"militarism_garrison_farms","tier":2,"type":"passive","name":"军屯"},
+        {"id":"militarism_merit_rank","tier":2,"type":"passive","name":"军功爵"},
+        {"id":"militarism_arsenal","tier":3,"type":"passive","name":"军器监"},
+        {"id":"militarism_expedition","tier":3,"type":"active","name":"远征"},
+        {"id":"militarism_unmatched","tier":4,"type":"ultimate","name":"天下无敌","cooldown_months":36,"duration_months":12}
+      ]
+    }
+  ]
+}
