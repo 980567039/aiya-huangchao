@@ -1,0 +1,49 @@
+{
+  "version": "0.3",
+  "effects": [
+    {
+      "id":"common_good_donation",
+      "name":"天下共济募捐",
+      "effects":[
+        {"type":"resource_delta","target":"treasury","formula":"donation_amount"},
+        {"type":"faction_satisfaction","target":"gentry","formula":"-2"},
+        {"type":"faction_satisfaction","target":"landlords","formula":"-4"},
+        {"type":"resource_delta","target":"authority","formula":"-1"}
+      ],
+      "event_hooks":["donation_success","donation_resistance"]
+    },
+    {
+      "id":"forced_tax",
+      "name":"强行征税",
+      "effects":[
+        {"type":"resource_delta","target":"treasury","formula":"5000"},
+        {"type":"faction_satisfaction","target":"peasants","formula":"-8"},
+        {"type":"faction_satisfaction","target":"landlords","formula":"-6"},
+        {"type":"resource_delta","target":"morale","formula":"-10"},
+        {"type":"state_modifier","target":"tax_resistance","duration_months":12}
+      ]
+    },
+    {
+      "id":"confiscate_estate",
+      "name":"抄没家产",
+      "effects":[
+        {"type":"faction_wealth","target":"selected_target","formula":"-target_wealth_share"},
+        {"type":"resource_delta","target":"treasury","formula":"confiscated_value"},
+        {"type":"faction_satisfaction","target":"selected_target","formula":"-20"},
+        {"type":"faction_satisfaction","target":"other_related_factions","formula":"-5"},
+        {"type":"spawn_event","event":"estate_conspiracy","probability_formula":"resentment_probability"}
+      ]
+    },
+    {
+      "id":"suppress_rebellion",
+      "name":"平叛",
+      "effects":[
+        {"type":"resource_delta","target":"army","formula":"-army_loss"},
+        {"type":"resource_delta","target":"food","formula":"-food_cost"},
+        {"type":"resource_delta","target":"weapons","formula":"-weapon_cost"},
+        {"type":"resource_delta","target":"treasury","formula":"-treasury_cost"},
+        {"type":"reduce_rebellion","target":"province","formula":"suppression_power"}
+      ]
+    }
+  ]
+}
