@@ -1,0 +1,17 @@
+{
+  "version": "0.1",
+  "events": [
+    {"id":"EV001","name":"旱灾","category":"disaster","base_probability":0.02,"conditions":["food<50"]},
+    {"id":"EV002","name":"洪灾","category":"disaster","base_probability":0.02,"conditions":[]},
+    {"id":"EV003","name":"蝗灾","category":"disaster","base_probability":0.01,"conditions":["food<70"]},
+    {"id":"EV004","name":"粮荒","category":"livelihood","base_probability":0.01,"conditions":["food<40"]},
+    {"id":"EV005","name":"土匪","category":"security","base_probability":0.02,"conditions":["security<60"]},
+    {"id":"EV006","name":"民变","category":"political","base_probability":0.01,"conditions":["morale<40"]},
+    {"id":"EV007","name":"官员贪腐","category":"political","base_probability":0.02,"conditions":["corruption>40"]},
+    {"id":"EV008","name":"士族冲突","category":"political","base_probability":0.01,"conditions":["gentry_influence>70"]},
+    {"id":"EV009","name":"军队欠饷","category":"military","base_probability":0.02,"conditions":["treasury<3000"]},
+    {"id":"EV010","name":"豪强抗税","category":"political","base_probability":0.01,"conditions":["landlord_influence>70"]},
+    {"id":"EV011","name":"海外贸易机会","category":"foreign_trade","base_probability":0.01,"conditions":[]},
+    {"id":"EV012","name":"东瀛内乱","category":"war","base_probability":0.005,"conditions":["military>=30"]}
+  ]
+}
