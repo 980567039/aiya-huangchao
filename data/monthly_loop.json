@@ -1,0 +1,37 @@
+{
+  "version": "0.4",
+  "calendar": {
+    "months_per_year": 12,
+    "years_per_game": 30,
+    "months_per_game": 360,
+    "starting_age": 30
+  },
+  "monthly_phases": [
+    "advance_time",
+    "province_production",
+    "central_revenue",
+    "national_upkeep",
+    "faction_update",
+    "province_update",
+    "persistent_effects",
+    "event_roll",
+    "generate_memorials",
+    "player_actions",
+    "resolve_actions",
+    "follow_up_events",
+    "rebellion_check",
+    "history_snapshot"
+  ],
+  "event_pressure": {
+    "calm": {"monthly_events_min": 0,"monthly_events_max": 2},
+    "tense": {"monthly_events_min": 2,"monthly_events_max": 4},
+    "crisis": {"monthly_events_min": 4,"monthly_events_max": 8}
+  },
+  "rebellion": {
+    "danger_threshold": 60,
+    "outbreak_threshold": 100
+  },
+  "skill_points": {
+    "annual_base": 2
+  }
+}
