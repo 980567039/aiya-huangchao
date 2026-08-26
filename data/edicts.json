@@ -1,0 +1,15 @@
+{
+  "version": "0.1",
+  "edicts": [
+    {"id":"E001","name":"加税","treasury":1500,"food":0,"weapons":0,"imperial":3,"factions":{"peasants":-10,"gentry":-4,"military":2,"landlords":-7}},
+    {"id":"E002","name":"减税","treasury":-1200,"food":0,"weapons":0,"imperial":-1,"factions":{"peasants":8,"gentry":3,"military":-2,"landlords":5}},
+    {"id":"E003","name":"赈灾","treasury":-500,"food":-3000,"weapons":0,"imperial":4,"factions":{"peasants":10,"gentry":2,"military":0,"landlords":1}},
+    {"id":"E004","name":"征兵","treasury":-300,"food":-500,"weapons":-300,"imperial":2,"factions":{"peasants":-6,"gentry":-2,"military":8,"landlords":-2}},
+    {"id":"E005","name":"裁军","treasury":500,"food":800,"weapons":0,"imperial":3,"factions":{"peasants":0,"gentry":2,"military":-10,"landlords":0}},
+    {"id":"E006","name":"扩军","treasury":-1000,"food":-1500,"weapons":-800,"imperial":2,"factions":{"peasants":-2,"gentry":-1,"military":10,"landlords":0}},
+    {"id":"E007","name":"查税","treasury":1200,"food":0,"weapons":0,"imperial":5,"factions":{"peasants":3,"gentry":-6,"military":0,"landlords":-10}},
+    {"id":"E008","name":"抄家","treasury":2000,"food":0,"weapons":0,"imperial":7,"factions":{"peasants":1,"gentry":-8,"military":0,"landlords":-15}},
+    {"id":"E009","name":"封赏武将","treasury":-1000,"food":0,"weapons":0,"imperial":2,"factions":{"peasants":0,"gentry":-2,"military":10,"landlords":0}},
+    {"id":"E010","name":"削弱武将","treasury":500,"food":0,"weapons":0,"imperial":6,"factions":{"peasants":0,"gentry":3,"military":-12,"landlords":0}}
+  ]
+}
