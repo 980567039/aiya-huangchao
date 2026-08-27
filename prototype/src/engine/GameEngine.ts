@@ -1,56 +1,12 @@
 export { newGame } from "../data/seedData";
-export {
-  BUILDING_IDS,
-  type BuildingId,
-  type BuildingState,
-} from "./GameState";
-export type {
-  CrisisStage,
-  CrisisState,
-  CrisisType,
-  EndingReason,
-  EndingState,
-  GameState,
-  HistoryEntry,
-  NationalResources,
-  ProvinceState,
-  FactionState,
-} from "./GameState";
-export {
-  BUILDING_DEFINITIONS,
-  buildBuilding,
-  canBuild,
-  calculateBuildingResourceDelta,
-  constructBuilding,
-  getBuildingDefinition,
-} from "./Buildings";
-export type {
-  BuildCheck,
-  BuildFailureReason,
-  BuildingDefinition,
-  ResourceDelta,
-} from "./Buildings";
-export {
-  calculateCrisisPressure,
-  calculateProvinceProduction,
-  centralCollectionEfficiency,
-  formatReignDate,
-  settleMonthlyEconomy,
-  settleMonthlyEconomyDetailed,
-  updateCrisis,
-} from "./MonthlyLoop";
+export { BUILDING_IDS, type BuildingId, type BuildingState } from "./GameState";
+export type { CrisisStage, CrisisState, CrisisType, EndingReason, EndingState, GameState, HistoryEntry, NationalResources, ProvinceState, FactionState } from "./GameState";
+export { BUILDING_DEFINITIONS, buildBuilding, canBuild, calculateBuildingResourceDelta, constructBuilding, upgradeBuilding, getBuildingDefinition, getBuildingInstances } from "./Buildings";
+export type { BuildCheck, BuildFailureReason, BuildingDefinition, ResourceDelta } from "./Buildings";
+export { calculateCrisisPressure, calculateProvinceProduction, centralCollectionEfficiency, formatReignDate, settleMonthlyEconomy, settleMonthlyEconomyDetailed, updateCrisis } from "./MonthlyLoop";
 export { advanceMonthWithFood as advanceMonth } from "./FoodSystem";
 export type { CrisisPressure, MonthlyEconomyResult, ProvinceProduction } from "./MonthlyLoop";
 export { calculateFoodShortage } from "./FoodSystem";
 export type { FoodShortageResult } from "./FoodSystem";
-export {
-  EVENT_DEFINITIONS,
-  drawMonthlyEvent,
-  eventRandom,
-  getEventDefinition,
-  getPendingEvent,
-  resolveEvent,
-  resolveMemorial,
-  chooseMemorial,
-} from "./EventEngine";
+export { EVENT_DEFINITIONS, drawMonthlyEvent, eventRandom, getEventDefinition, getPendingEvent, resolveEvent, resolveMemorial, chooseMemorial } from "./EventEngine";
 export type { EventDefinition, MonthlyEventResult } from "./EventEngine";
