@@ -12,15 +12,14 @@ export const PROVINCE_IDS = [
 ] as const;
 
 export const FACTION_IDS = ["gentry", "military", "peasants", "landlords"] as const;
-/** Buildings available in the prototype's main city. */
-export const BUILDING_IDS = ["civilian", "barracks", "kitchen"] as const;
+/** Main-city buildings. Each building can be upgraded independently from level 1 to its configured max level. */
+export const BUILDING_IDS = ["granary", "treasury", "barracks", "armory", "workshop", "market"] as const;
 
 export type ProvinceId = (typeof PROVINCE_IDS)[number];
 export type FactionId = (typeof FACTION_IDS)[number];
 export type BuildingId = (typeof BUILDING_IDS)[number];
 
 export interface GameTime {
-  /** Number of months elapsed since the start of the reign. Initial value is 0. */
   totalMonths: number;
   year: number;
   month: number;
@@ -40,10 +39,9 @@ export interface NationalResources {
   morale: number;
 }
 
-/** A constructed building and its current upgrade level. */
 export interface BuildingState {
   id: BuildingId;
-  /** Buildings default to the central province (the capital/main city). */
+  /** Main-city buildings default to the central province. */
   provinceId: ProvinceId;
   level: number;
 }
@@ -75,76 +73,23 @@ export interface FactionState {
   fear: number;
 }
 
-export interface ActiveModifier {
-  id: string;
-  name: string;
-  durationMonths: number;
-}
-
-export interface ActiveEvent {
-  id: string;
-  name: string;
-  durationMonths: number;
-  /** Optional metadata used by the event/memorial view. */
-  category?: string;
-  urgency?: "low" | "normal" | "high";
-}
+export interface ActiveModifier { id: string; name: string; durationMonths: number; }
+export interface ActiveEvent { id: string; name: string; durationMonths: number; category?: string; urgency?: "low" | "normal" | "high"; }
 
 export type MemorialOptionEffect =
-  | {
-      type: "resource_delta";
-      resource: keyof NationalResources;
-      amount: number;
-    }
-  | {
-      type: "faction_delta";
-      factionId: FactionId;
-      satisfaction?: number;
-      influence?: number;
-      wealth?: number;
-      organization?: number;
-      resentment?: number;
-      fear?: number;
-    }
-  | {
-      type: "province_delta";
-      provinceId?: ProvinceId;
-      food?: number;
-      treasury?: number;
-      security?: number;
-      morale?: number;
-      corruption?: number;
-      localLoyalty?: number;
-      rebellionRisk?: number;
-      gentryInfluence?: number;
-      landlordInfluence?: number;
-      militaryPresence?: number;
-    }
-  | {
-      type: "state_modifier";
-      id: string;
-      name: string;
-      durationMonths: number;
-    }
-  | {
-      type: "spawn_event";
-      eventId: string;
-    };
+  | { type: "resource_delta"; resource: keyof NationalResources; amount: number }
+  | { type: "faction_delta"; factionId: FactionId; satisfaction?: number; influence?: number; wealth?: number; organization?: number; resentment?: number; fear?: number }
+  | { type: "province_delta"; provinceId?: ProvinceId; food?: number; treasury?: number; security?: number; morale?: number; corruption?: number; localLoyalty?: number; rebellionRisk?: number; gentryInfluence?: number; landlordInfluence?: number; militaryPresence?: number }
+  | { type: "state_modifier"; id: string; name: string; durationMonths: number }
+  | { type: "spawn_event"; eventId: string };
 
-export interface MemorialOption {
-  id: string;
-  label: string;
-  description: string;
-  effects: MemorialOptionEffect[];
-}
-
+export interface MemorialOption { id: string; label: string; description: string; effects: MemorialOptionEffect[]; }
 export interface Memorial {
   id: string;
   title: string;
   source: string;
   description: string;
   urgency: "low" | "normal" | "high";
-  /** ID of the event definition that produced this memorial. */
   eventId?: string;
   category?: string;
   provinceId?: ProvinceId;
@@ -153,24 +98,15 @@ export interface Memorial {
   createdAt?: number;
 }
 
-export type CrisisType =
-  | "peasant_revolt"
-  | "military_coup"
-  | "gentry_coup"
-  | "landlord_secession"
-  | "state_collapse";
-
+export type CrisisType = "peasant_revolt" | "military_coup" | "gentry_coup" | "landlord_secession" | "state_collapse";
 export type CrisisStage = "warning" | "critical";
-
 export interface CrisisState {
   type: CrisisType;
-  /** 0–100 pressure; 100 means this crisis can end the reign. */
   pressure: number;
   stage: CrisisStage;
   startedAt: number;
   monthsActive: number;
   provinceId?: ProvinceId;
-  /** Consecutive shortage/unrest counters used to explain the pressure gauge. */
   foodShortageMonths: number;
   treasuryArrearsMonths: number;
   unrestMonths: number;
@@ -178,7 +114,6 @@ export interface CrisisState {
 }
 
 export type EndingReason = "normal_retirement" | CrisisType;
-
 export interface HistoryEntry {
   year: number;
   month: number;
@@ -188,20 +123,11 @@ export interface HistoryEntry {
   factionChanges: Partial<Record<FactionId, number>>;
   events: string[];
   memorials: string[];
-  /** Optional V0.3 diagnostics; old history snapshots remain valid. */
   crisis?: CrisisType;
   pressure?: number;
   shortages?: string[];
 }
-
-export interface EndingState {
-  reason: EndingReason;
-  totalMonths: number;
-  crisis?: CrisisState;
-  triggerFactionId?: FactionId;
-  cause?: string;
-  keyLogs?: string[];
-}
+export interface EndingState { reason: EndingReason; totalMonths: number; crisis?: CrisisState; triggerFactionId?: FactionId; cause?: string; keyLogs?: string[]; }
 
 export interface GameState {
   time: GameTime;
@@ -213,7 +139,6 @@ export interface GameState {
   activeModifiers: ActiveModifier[];
   activeEvents: ActiveEvent[];
   pendingMemorials: Memorial[];
-  /** Current warning/critical national crisis, if any. */
   crisis: CrisisState | null;
   unlockedSkills: string[];
   history: HistoryEntry[];
