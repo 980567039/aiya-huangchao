@@ -28,7 +28,10 @@
     "crisis": {"monthly_events_min": 4,"monthly_events_max": 8}
   },
   "rebellion": {
+    "normal_max": 39,
+    "tense_max": 59,
     "danger_threshold": 60,
+    "critical_threshold": 80,
     "outbreak_threshold": 100
   },
   "skill_points": {
