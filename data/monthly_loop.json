@@ -4,7 +4,7 @@
     "months_per_year": 12,
     "years_per_game": 30,
     "months_per_game": 360,
-    "starting_age": 30
+    "starting_age": 20
   },
   "monthly_phases": [
     "advance_time",
