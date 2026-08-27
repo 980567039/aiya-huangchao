@@ -1,0 +1,12 @@
+{
+  "version": "0.2",
+  "description": "New-game national resource seed values. Runtime code must load these values instead of defining hidden defaults.",
+  "resources": {
+    "treasury": 8000,
+    "food": 7000,
+    "weapons": 1200,
+    "army": 1800,
+    "authority": 45,
+    "morale": 42
+  }
+}
