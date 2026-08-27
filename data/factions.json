@@ -1,10 +1,10 @@
 {
-  "version": "0.1",
+  "version": "0.2",
+  "description": "新游戏四大普通势力初始状态。皇权不属于 factions，使用国家资源 authority 表示。",
   "factions": [
-    {"id":"imperial","name":"皇权","satisfaction":70,"influence":100},
-    {"id":"gentry","name":"士族","satisfaction":65,"influence":80},
-    {"id":"military","name":"武将","satisfaction":60,"influence":65},
-    {"id":"peasants","name":"百姓","satisfaction":65,"influence":100},
-    {"id":"landlords","name":"豪强","satisfaction":60,"influence":70}
+    {"id":"gentry","name":"士族","satisfaction":50,"influence":80,"wealth":72,"organization":68,"resentment":8,"fear":8},
+    {"id":"military","name":"武将","satisfaction":45,"influence":65,"wealth":58,"organization":76,"resentment":10,"fear":12},
+    {"id":"peasants","name":"百姓","satisfaction":50,"influence":100,"wealth":40,"organization":36,"resentment":12,"fear":5},
+    {"id":"landlords","name":"豪强","satisfaction":45,"influence":70,"wealth":84,"organization":62,"resentment":9,"fear":10}
   ]
 }
