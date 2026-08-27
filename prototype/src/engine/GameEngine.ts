@@ -31,7 +31,6 @@ export type {
   ResourceDelta,
 } from "./Buildings";
 export {
-  advanceMonth,
   calculateCrisisPressure,
   calculateProvinceProduction,
   centralCollectionEfficiency,
@@ -40,7 +39,10 @@ export {
   settleMonthlyEconomyDetailed,
   updateCrisis,
 } from "./MonthlyLoop";
+export { advanceMonthWithFood as advanceMonth } from "./FoodSystem";
 export type { CrisisPressure, MonthlyEconomyResult, ProvinceProduction } from "./MonthlyLoop";
+export { calculateFoodShortage } from "./FoodSystem";
+export type { FoodShortageResult } from "./FoodSystem";
 export {
   EVENT_DEFINITIONS,
   drawMonthlyEvent,
