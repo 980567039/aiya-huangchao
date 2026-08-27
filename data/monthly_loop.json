@@ -1,5 +1,5 @@
 {
-  "version": "0.4",
+  "version": "0.5",
   "calendar": {
     "months_per_year": 12,
     "years_per_game": 30,
@@ -10,7 +10,11 @@
     "advance_time",
     "province_production",
     "central_revenue",
-    "national_upkeep",
+    "capital_buildings",
+    "army_food_upkeep",
+    "barracks_food_upkeep",
+    "food_shortage_resolution",
+    "population_and_army_loss",
     "faction_update",
     "province_update",
     "persistent_effects",
@@ -22,6 +26,20 @@
     "rebellion_check",
     "history_snapshot"
   ],
+  "food_upkeep": {
+    "army_food_per_soldier": 0.05,
+    "barracks_food_per_level": 300,
+    "shortage": {
+      "food_stockpile_floor": 0,
+      "peasant_loss_per_10000_shortage": 1,
+      "soldier_loss_per_80_shortage": 1,
+      "peasant_satisfaction_base_loss": 4,
+      "military_satisfaction_base_loss": 3,
+      "severity_step": 5000,
+      "max_peasant_satisfaction_loss": 12,
+      "max_military_satisfaction_loss": 10
+    }
+  },
   "event_pressure": {
     "calm": {"monthly_events_min": 0,"monthly_events_max": 2},
     "tense": {"monthly_events_min": 2,"monthly_events_max": 4},
