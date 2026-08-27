@@ -18,6 +18,10 @@ type RawFaction = {
   name: string;
   satisfaction: number;
   influence: number;
+  wealth: number;
+  organization: number;
+  resentment: number;
+  fear: number;
 };
 
 type RawProvince = {
@@ -37,16 +41,6 @@ type RawProvince = {
 
 const rawFactionList = rawFactions.factions as RawFaction[];
 const rawProvinceList = rawProvinces.provinces as RawProvince[];
-
-const factionDefaults: Record<
-  FactionId,
-  Pick<FactionState, "wealth" | "organization" | "resentment" | "fear">
-> = {
-  gentry: { wealth: 72, organization: 68, resentment: 8, fear: 8 },
-  military: { wealth: 58, organization: 76, resentment: 10, fear: 12 },
-  peasants: { wealth: 40, organization: 36, resentment: 12, fear: 5 },
-  landlords: { wealth: 84, organization: 62, resentment: 9, fear: 10 },
-};
 
 const initialResources: NationalResources = {
   // V0.3 deliberately starts tight: building an economy is a meaningful
@@ -96,7 +90,8 @@ function createProvinces(): ProvinceState[] {
 }
 
 function createFactions(): FactionState[] {
-  // The prototype deliberately keeps 皇权 as a national resource (authority), not a fifth faction.
+  // factions.json is the single source of truth for the four ordinary
+  // factions' new-game state. 皇权 is represented by resources.authority.
   return FACTION_IDS.map((id) => {
     const raw = rawFactionList.find((faction) => faction.id === id);
     if (!raw) {
@@ -105,11 +100,12 @@ function createFactions(): FactionState[] {
     return {
       id: asFactionId(raw.id),
       name: raw.name,
-      // The founding court is already fractured.  Raw faction data describes
-      // the pre-war baseline; the new emperor starts fifteen points below it.
-      satisfaction: Math.max(20, raw.satisfaction - 15),
+      satisfaction: raw.satisfaction,
       influence: raw.influence,
-      ...factionDefaults[id],
+      wealth: raw.wealth,
+      organization: raw.organization,
+      resentment: raw.resentment,
+      fear: raw.fear,
     };
   });
 }
