@@ -1,4 +1,5 @@
 import rawFactions from "../../../data/factions.json";
+import rawNationalResources from "../../../data/national_resources.json";
 import rawProvinces from "../../../data/provinces.json";
 import {
   FACTION_IDS,
@@ -37,21 +38,21 @@ type RawProvince = {
   gentry_influence: number;
   landlord_influence: number;
   garrison: number;
+  rebellion_risk: number;
+};
+
+type RawNationalResources = {
+  treasury: number;
+  food: number;
+  weapons: number;
+  army: number;
+  authority: number;
+  morale: number;
 };
 
 const rawFactionList = rawFactions.factions as RawFaction[];
 const rawProvinceList = rawProvinces.provinces as RawProvince[];
-
-const initialResources: NationalResources = {
-  // V0.3 deliberately starts tight: building an economy is a meaningful
-  // opening decision, while a few months of reserve still remain.
-  treasury: 8_000,
-  food: 7_000,
-  weapons: 1_200,
-  army: 1_800,
-  authority: 45,
-  morale: 42,
-};
+const initialResources = rawNationalResources.resources as RawNationalResources;
 
 const asProvinceId = (id: string): ProvinceId => {
   if (!PROVINCE_IDS.includes(id as ProvinceId)) {
@@ -68,25 +69,21 @@ const asFactionId = (id: string): FactionId => {
 };
 
 function createProvinces(): ProvinceState[] {
-  return rawProvinceList
-    .filter((province) => PROVINCE_IDS.includes(province.id as ProvinceId))
-    .map((province) => ({
-      id: asProvinceId(province.id),
-      name: province.name,
-      population: province.population,
-      food: province.food,
-      treasury: province.treasury,
-      // The new emperor inherits a country that is functional, but brittle:
-      // low security/morale and elevated corruption make early choices matter.
-      security: Math.max(20, province.security - 10),
-      morale: Math.max(20, province.morale - 10),
-      corruption: Math.min(90, province.corruption + 8),
-      localLoyalty: province.local_loyalty,
-      rebellionRisk: 12,
-      gentryInfluence: province.gentry_influence,
-      landlordInfluence: province.landlord_influence,
-      militaryPresence: province.garrison,
-    }));
+  return rawProvinceList.map((province) => ({
+    id: asProvinceId(province.id),
+    name: province.name,
+    population: province.population,
+    food: province.food,
+    treasury: province.treasury,
+    security: province.security,
+    morale: province.morale,
+    corruption: province.corruption,
+    localLoyalty: province.local_loyalty,
+    rebellionRisk: province.rebellion_risk,
+    gentryInfluence: province.gentry_influence,
+    landlordInfluence: province.landlord_influence,
+    militaryPresence: province.garrison,
+  }));
 }
 
 function createFactions(): FactionState[] {
@@ -115,8 +112,6 @@ export function newGame(): GameState {
     time: { totalMonths: 0, year: 1, month: 1 },
     emperor: { age: STARTING_AGE, reignTitle: REIGN_TITLE },
     resources: { ...initialResources },
-    // The capital starts undeveloped so the first decisions are construction
-    // choices rather than an automatic stream of resources.
     buildings: [],
     provinces: createProvinces(),
     factions: createFactions(),
