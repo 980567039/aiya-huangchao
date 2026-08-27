@@ -1,72 +1,13 @@
 {
-  "version": "0.1",
-  "description": "主城区建筑配置。每个建筑独立存在并可从1级逐级升级到5级。",
+  "version": "0.2",
+  "description": "主城区建筑配置。建筑类型可以建造多个实体；每个实体独立升级。建造与升级均消耗民力。",
   "buildings": [
-    {
-      "id": "granary",
-      "name": "官仓",
-      "description": "储存与调度国粮，是赈灾和军粮体系的核心。",
-      "icon": "仓",
-      "tone": "green",
-      "max_level": 5,
-      "construction_cost": {"treasury": 2600},
-      "monthly_production": {"food": 850},
-      "monthly_upkeep": {"treasury": 40}
-    },
-    {
-      "id": "treasury",
-      "name": "国库",
-      "description": "管理中央财政，提高朝廷每月可支配的财富。",
-      "icon": "库",
-      "tone": "gold",
-      "max_level": 5,
-      "construction_cost": {"treasury": 4200},
-      "monthly_production": {"treasury": 650, "authority": 1},
-      "monthly_upkeep": {"treasury": 60}
-    },
-    {
-      "id": "barracks",
-      "name": "兵营",
-      "description": "训练和驻扎禁军。兵营等级越高，军队增长越快，但每月需要额外军粮。",
-      "icon": "营",
-      "tone": "red",
-      "max_level": 5,
-      "construction_cost": {"treasury": 5200, "weapons": 220},
-      "monthly_production": {"army": 150, "morale": 1},
-      "monthly_upkeep": {"treasury": 180, "food": 300}
-    },
-    {
-      "id": "armory",
-      "name": "武库",
-      "description": "储备兵器与军械。升级后可以稳定扩大国家军备储备。",
-      "icon": "械",
-      "tone": "red",
-      "max_level": 5,
-      "construction_cost": {"treasury": 3800, "weapons": 120},
-      "monthly_production": {"weapons": 85},
-      "monthly_upkeep": {"treasury": 70}
-    },
-    {
-      "id": "workshop",
-      "name": "工部作坊",
-      "description": "生产兵器、器械和军需品，是战争能力的重要基础。",
-      "icon": "工",
-      "tone": "gold",
-      "max_level": 5,
-      "construction_cost": {"treasury": 3400, "weapons": 80},
-      "monthly_production": {"weapons": 55, "treasury": 180},
-      "monthly_upkeep": {"treasury": 100, "food": 40}
-    },
-    {
-      "id": "market",
-      "name": "市舶司",
-      "description": "管理商贸与海外贸易，为中央提供额外财政收入，但也会受到贸易事件影响。",
-      "icon": "贸",
-      "tone": "gold",
-      "max_level": 5,
-      "construction_cost": {"treasury": 3000},
-      "monthly_production": {"treasury": 500},
-      "monthly_upkeep": {"treasury": 80}
-    }
+    {"id":"granary","name":"官仓","description":"储存与调度国粮，是赈灾和军粮体系的核心。","icon":"仓","tone":"green","max_level":5,"max_instances":10,"construction_cost":{"treasury":2600},"construction_manpower":10,"upgrade_cost":{"treasury":1800},"upgrade_manpower":10,"monthly_production":{"food":850},"monthly_upkeep":{"treasury":40}},
+    {"id":"treasury","name":"国库","description":"管理中央财政，提高朝廷每月可支配的财富。","icon":"库","tone":"gold","max_level":5,"max_instances":10,"construction_cost":{"treasury":4200},"construction_manpower":10,"upgrade_cost":{"treasury":2800},"upgrade_manpower":10,"monthly_production":{"treasury":650,"authority":1},"monthly_upkeep":{"treasury":60}},
+    {"id":"barracks","name":"兵营","description":"训练和驻扎禁军。兵营越多，军队增长越快，但每月军粮压力也越大。","icon":"营","tone":"red","max_level":5,"max_instances":10,"construction_cost":{"treasury":5200,"weapons":220},"construction_manpower":10,"upgrade_cost":{"treasury":3600,"weapons":140},"upgrade_manpower":10,"monthly_production":{"army":150,"morale":1},"monthly_upkeep":{"treasury":180,"food":300}},
+    {"id":"armory","name":"武库","description":"储备兵器与军械。多个武库可以形成更强的军备储备。","icon":"械","tone":"red","max_level":5,"max_instances":10,"construction_cost":{"treasury":3800,"weapons":120},"construction_manpower":10,"upgrade_cost":{"treasury":2500,"weapons":80},"upgrade_manpower":10,"monthly_production":{"weapons":85},"monthly_upkeep":{"treasury":70}},
+    {"id":"workshop","name":"工部作坊","description":"生产兵器、器械和军需品，是战争能力的重要基础。","icon":"工","tone":"gold","max_level":5,"max_instances":10,"construction_cost":{"treasury":3400,"weapons":80},"construction_manpower":10,"upgrade_cost":{"treasury":2300,"weapons":60},"upgrade_manpower":10,"monthly_production":{"weapons":55,"treasury":180},"monthly_upkeep":{"treasury":100,"food":40}},
+    {"id":"market","name":"市舶司","description":"管理商贸与海外贸易，为中央提供额外财政收入。","icon":"贸","tone":"gold","max_level":5,"max_instances":10,"construction_cost":{"treasury":3000},"construction_manpower":10,"upgrade_cost":{"treasury":2100},"upgrade_manpower":10,"monthly_production":{"treasury":500},"monthly_upkeep":{"treasury":80}},
+    {"id":"civilian_camp","name":"民营","description":"组织民夫、工匠和基层劳力。民营越多，朝廷每月可动用的民力越多，是大型工程和持续建设的基础。","icon":"民","tone":"green","max_level":5,"max_instances":10,"construction_cost":{"treasury":1200},"construction_manpower":10,"upgrade_cost":{"treasury":900},"upgrade_manpower":10,"monthly_production":{"manpower":120},"monthly_upkeep":{"food":20}}
   ]
 }
