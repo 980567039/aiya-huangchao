@@ -1,12 +1,13 @@
 {
-  "version": "0.2",
-  "description": "New-game national resource seed values. Runtime code must load these values instead of defining hidden defaults.",
+  "version": "0.3",
+  "description": "国家初始资源。民力是百姓可被朝廷调度的劳动力池，建设与大型工程会直接消耗民力。",
   "resources": {
     "treasury": 8000,
     "food": 7000,
     "weapons": 1200,
     "army": 1800,
     "authority": 45,
-    "morale": 42
+    "morale": 42,
+    "manpower": 1000
   }
 }
