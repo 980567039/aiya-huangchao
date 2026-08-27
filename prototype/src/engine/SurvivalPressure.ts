@@ -2,9 +2,12 @@ import type { GameState, NationalResources } from "./GameState";
 
 /** V0.5 economy tuning. Keep these values in one place so balance iteration does not require rewriting the monthly loop. */
 export const SURVIVAL_BALANCE = {
-  populationFoodConsumption: 2,
-  populationManpowerRecovery: 0.2,
-  baseTreasuryAdministrationCost: 900,
+  // Province population is stored in compact 10,000-person units. At 7 food
+  // per population unit, the unbuilt realm is close to subsistence rather than
+  // producing a huge monthly surplus.
+  populationFoodConsumption: 7,
+  populationManpowerRecovery: 0.15,
+  baseTreasuryAdministrationCost: 1600,
   armyFoodConsumptionRate: 0.05,
   armyTreasuryUpkeepRate: 0.02,
 } as const;
@@ -18,8 +21,8 @@ export interface SurvivalPressureDelta {
 /**
  * Fixed monthly pressure that exists even when the emperor builds nothing.
  * Province production is calculated elsewhere; this layer represents the
- * unavoidable cost of feeding the population, maintaining the state, and
- * gradually refreshing the labor pool.
+ * unavoidable cost of feeding the population, maintaining the state, paying
+ * the standing army, and gradually refreshing the labor pool.
  */
 export function calculateSurvivalPressure(state: Pick<GameState, "resources" | "provinces">): SurvivalPressureDelta {
   const population = state.provinces.reduce((sum, province) => sum + province.population, 0);
