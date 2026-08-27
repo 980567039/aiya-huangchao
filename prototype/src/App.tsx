@@ -1,127 +1,40 @@
 import { useMemo, useState } from "react";
-import {
-  BUILDING_DEFINITIONS,
-  advanceMonth,
-  buildBuilding,
-  canBuild,
-  formatReignDate,
-  newGame,
-  resolveMemorial,
-} from "./engine/GameEngine";
+import { BUILDING_DEFINITIONS, advanceMonth, buildBuilding, canBuild, formatReignDate, newGame, resolveMemorial } from "./engine/GameEngine";
 import type { BuildingId, BuildingState, FactionState, GameState, MemorialOption, NationalResources } from "./engine/GameState";
 import "./styles.css";
 
-const resourceLabels: Array<[keyof NationalResources, string, string]> = [
-  ["treasury", "国库", "两"], ["food", "粮食", "石"], ["weapons", "兵器", "件"],
-  ["army", "军队", "人"], ["authority", "皇权", ""], ["morale", "民心", ""],
-];
-const resourceNames: Record<keyof NationalResources, string> = {
-  treasury: "国库", food: "粮食", weapons: "兵器", army: "军队", authority: "皇权", morale: "民心",
-};
-const factionTone: Record<FactionState["id"], string> = {
-  gentry: "tone-blue", military: "tone-red", peasants: "tone-green", landlords: "tone-amber",
-};
+const resourceLabels: Array<[keyof NationalResources, string, string]> = [["treasury", "国库", "两"], ["food", "粮食", "石"], ["weapons", "兵器", "件"], ["army", "军队", "人"], ["authority", "皇权", ""], ["morale", "民心", ""]];
+const resourceNames: Record<keyof NationalResources, string> = { treasury: "国库", food: "粮食", weapons: "兵器", army: "军队", authority: "皇权", morale: "民心" };
+const factionTone: Record<FactionState["id"], string> = { gentry: "tone-blue", military: "tone-red", peasants: "tone-green", landlords: "tone-amber" };
 const buildingOrder: BuildingId[] = ["granary", "treasury", "barracks", "armory", "workshop", "market"];
 const buildingFallbackIcon: Record<BuildingId, string> = { granary: "仓", treasury: "库", barracks: "营", armory: "械", workshop: "工", market: "贸" };
-
 type Delta = Partial<Record<keyof NationalResources, number>>;
 const clamp = (n: number) => Math.max(0, Math.min(100, n));
 const number = (n: number) => new Intl.NumberFormat("zh-CN").format(n);
 const deltaText = (n: number) => `${n >= 0 ? "+" : "−"}${number(Math.abs(n))}`;
-
-function buildingLevel(buildings: BuildingState[], id: BuildingId) {
-  return buildings.find((b) => b.id === id && b.provinceId === "central")?.level ?? 0;
-}
-function buildingDelta(buildings: BuildingState[]): Delta {
-  const result: Delta = {};
-  for (const b of buildings) {
-    const d = BUILDING_DEFINITIONS[b.id];
-    if (!d) continue;
-    for (const [key, value] of Object.entries(d.monthlyProduction)) result[key as keyof NationalResources] = (result[key as keyof NationalResources] ?? 0) + (value ?? 0) * b.level;
-    for (const [key, value] of Object.entries(d.monthlyUpkeep)) result[key as keyof NationalResources] = (result[key as keyof NationalResources] ?? 0) - (value ?? 0) * b.level;
-  }
-  return result;
-}
-function costText(cost: Delta) {
-  const entries = Object.entries(cost).filter(([, v]) => v);
-  return entries.length ? entries.map(([k, v]) => `${resourceNames[k as keyof NationalResources]} ${number(v as number)}`).join(" · ") : "无需额外物资";
-}
+function buildingLevel(buildings: BuildingState[], id: BuildingId) { return buildings.find((b) => b.id === id && b.provinceId === "central")?.level ?? 0; }
+function buildingDelta(buildings: BuildingState[]): Delta { const result: Delta = {}; for (const b of buildings) { const d = BUILDING_DEFINITIONS[b.id]; if (!d) continue; for (const [key, value] of Object.entries(d.monthlyProduction)) result[key as keyof NationalResources] = (result[key as keyof NationalResources] ?? 0) + (value ?? 0) * b.level; for (const [key, value] of Object.entries(d.monthlyUpkeep)) result[key as keyof NationalResources] = (result[key as keyof NationalResources] ?? 0) - (value ?? 0) * b.level; } return result; }
+function costText(cost: Delta) { const entries = Object.entries(cost).filter(([, v]) => v); return entries.length ? entries.map(([k, v]) => `${resourceNames[k as keyof NationalResources]} ${number(v as number)}`).join(" · ") : "无需额外物资"; }
 function riskText(s: number) { return s <= 25 ? "濒临反叛" : s <= 50 ? "危险" : s <= 70 ? "不满" : "支持"; }
-
-function FactionCard({ faction }: { faction: FactionState }) {
-  const tone = factionTone[faction.id];
-  return <article className={`faction-card faction-card--${faction.satisfaction <= 50 ? "danger" : "stable"}`}>
-    <div className="card-heading"><div><h3>{faction.name}</h3><span className="muted">影响力 {faction.influence}</span></div><span className={`faction-badge ${tone}`}>{faction.satisfaction}</span></div>
-    <div className="faction-satisfaction"><span>满意度 · 王朝存亡关键</span><strong>{faction.satisfaction}<small> / 100</small></strong></div>
-    <div className="stat-bar"><span className={`stat-bar__fill ${tone}`} style={{ width: `${clamp(faction.satisfaction)}%` }} /></div>
-    <div className="faction-risk-label">当前态度：<b>{riskText(faction.satisfaction)}</b></div>
-    <div className="card-footer"><span>组织力 {faction.organization}</span><span>积怨 {faction.resentment}</span></div>
-  </article>;
-}
-
-function BuildingCard({ id, state, onBuild }: { id: BuildingId; state: GameState; onBuild: (id: BuildingId) => void }) {
-  const d = BUILDING_DEFINITIONS[id];
-  const level = buildingLevel(state.buildings, id);
-  const check = canBuild(state, id, "central");
-  const atMax = level >= d.maxLevel;
-  const production = Object.entries(d.monthlyProduction).filter(([, v]) => v);
-  const upkeep = Object.entries(d.monthlyUpkeep).filter(([, v]) => v);
-  const tone = d.tone === "red" ? "building-card--red" : d.tone === "green" ? "building-card--green" : "";
-  return <article className={`building-card ${tone}`}>
-    <div className="building-card__topline"><span className="building-icon">{d.icon || buildingFallbackIcon[id]}</span><div className="building-title"><div className="building-title__line"><h3>{d.name}</h3><span className="building-level">Lv.{level} / {d.maxLevel}</span></div><span className="muted">主城 · 独立升级</span></div></div>
-    <p className="building-description">{d.description}</p>
-    <div className="building-yields"><div><span className="building-yields__label">每月产出</span><div className="building-yields__values">{production.length ? production.map(([k, v]) => <span className="yield-positive" key={k}>{resourceNames[k as keyof NationalResources]} {deltaText((v as number) * Math.max(level, 1))}</span>) : <span className="yield-empty">暂无</span>}</div></div><div><span className="building-yields__label">每月维护</span><div className="building-yields__values">{upkeep.length ? upkeep.map(([k, v]) => <span className="yield-negative" key={k}>{resourceNames[k as keyof NationalResources]} −{number((v as number) * Math.max(level, 1))}</span>) : <span className="yield-empty">暂无</span>}</div></div></div>
-    <div className="building-card__footer"><div><span className="building-cost-label">{atMax ? "已达最高等级" : `${level ? "升级" : "建设"}成本 · ${costText(check.cost)}`}</span>{!atMax && !check.ok && <span className="building-warning">资源不足</span>}</div><button className="build-button" disabled={atMax || !check.ok || Boolean(state.ending)} onClick={() => onBuild(id)}>{atMax ? "已满级" : level ? "升级" : "开始建设"}</button></div>
-  </article>;
-}
-
+function FactionCard({ faction }: { faction: FactionState }) { const tone = factionTone[faction.id]; return <article className={`faction-card faction-card--${faction.satisfaction <= 50 ? "danger" : "stable"}`}><div className="card-heading"><div><h3>{faction.name}</h3><span className="muted">影响力 {faction.influence}</span></div><span className={`faction-badge ${tone}`}>{faction.satisfaction}</span></div><div className="faction-satisfaction"><span>满意度 · 王朝存亡关键</span><strong>{faction.satisfaction}<small> / 100</small></strong></div><div className="stat-bar"><span className={`stat-bar__fill ${tone}`} style={{ width: `${clamp(faction.satisfaction)}%` }} /></div><div className="faction-risk-label">当前态度：<b>{riskText(faction.satisfaction)}</b></div><div className="card-footer"><span>组织力 {faction.organization}</span><span>积怨 {faction.resentment}</span></div></article>; }
+function BuildingCard({ id, state, onBuild }: { id: BuildingId; state: GameState; onBuild: (id: BuildingId) => void }) { const d = BUILDING_DEFINITIONS[id]; const level = buildingLevel(state.buildings, id); const check = canBuild(state, id, "central"); const atMax = level >= d.maxLevel; const production = Object.entries(d.monthlyProduction).filter(([, v]) => v); const upkeep = Object.entries(d.monthlyUpkeep).filter(([, v]) => v); const tone = d.tone === "red" ? "building-card--red" : d.tone === "green" ? "building-card--green" : ""; return <article className={`building-card ${tone}`}><div className="building-card__topline"><span className="building-icon">{d.icon || buildingFallbackIcon[id]}</span><div className="building-title"><div className="building-title__line"><h3>{d.name}</h3><span className="building-level">Lv.{level} / {d.maxLevel}</span></div><span className="muted">主城 · 独立升级</span></div></div><p className="building-description">{d.description}</p><div className="building-yields"><div><span className="building-yields__label">每月产出</span><div className="building-yields__values">{production.length ? production.map(([k, v]) => <span className="yield-positive" key={k}>{resourceNames[k as keyof NationalResources]} {deltaText((v as number) * Math.max(level, 1))}</span>) : <span className="yield-empty">暂无</span>}</div></div><div><span className="building-yields__label">每月维护</span><div className="building-yields__values">{upkeep.length ? upkeep.map(([k, v]) => <span className="yield-negative" key={k}>{resourceNames[k as keyof NationalResources]} −{number((v as number) * Math.max(level, 1))}</span>) : <span className="yield-empty">暂无</span>}</div></div></div><div className="building-card__footer"><div><span className="building-cost-label">{atMax ? "已达最高等级" : `${level ? "升级" : "建设"}成本 · ${costText(check.cost)}`}</span>{!atMax && !check.ok && <span className="building-warning">资源不足</span>}</div><button className="build-button" disabled={atMax || !check.ok || Boolean(state.ending)} onClick={() => onBuild(id)}>{atMax ? "已满级" : level ? "升级" : "开始建设"}</button></div></article>; }
 function App() {
-  const [state, setState] = useState<GameState>(() => newGame());
-  const [notice, setNotice] = useState("");
-  const delta = useMemo(() => buildingDelta(state.buildings), [state.buildings]);
-  const progress = (state.time.totalMonths / 360) * 100;
-  const pending = state.pendingMemorials[0];
-  const lowestFaction = Math.min(...state.factions.map((f) => f.satisfaction));
-  const crisisPressure = clamp(Math.round(100 - lowestFaction + Math.max(0, 60 - state.resources.morale) * 0.5));
-
-  const handleBuild = (id: BuildingId) => {
-    const before = buildingLevel(state.buildings, id);
-    const check = canBuild(state, id, "central");
-    if (!check.ok) { setNotice(`${BUILDING_DEFINITIONS[id].name}暂时无法建设：资源不足或已达上限。`); return; }
-    setState((current) => buildBuilding(current, id, "central"));
-    setNotice(`${BUILDING_DEFINITIONS[id].name}已${before ? "升级" : "建设"}至 Lv.${before + 1}。`);
-  };
-  const nextMonth = () => {
-    if (state.ending || pending) return;
-    setState((current) => advanceMonth(current));
-    setNotice("");
-  };
-  const resolve = (optionId: string) => {
-    if (!pending) return;
-    setState((current) => resolveMemorial(current, pending.id, optionId));
-    setNotice("");
-  };
-
+  const [state, setState] = useState<GameState>(() => newGame()); const [notice, setNotice] = useState(""); const delta = useMemo(() => buildingDelta(state.buildings), [state.buildings]); const progress = (state.time.totalMonths / 360) * 100; const pending = state.pendingMemorials[0]; const lowestFaction = Math.min(...state.factions.map((f) => f.satisfaction)); const crisisPressure = clamp(Math.round(100 - lowestFaction + Math.max(0, 60 - state.resources.morale) * 0.5));
+  const handleBuild = (id: BuildingId) => { const before = buildingLevel(state.buildings, id); const check = canBuild(state, id, "central"); if (!check.ok) { setNotice(`${BUILDING_DEFINITIONS[id].name}暂时无法建设：资源不足或已达上限。`); return; } setState((current) => buildBuilding(current, id, "central")); setNotice(`${BUILDING_DEFINITIONS[id].name}已${before ? "升级" : "建设"}至 Lv.${before + 1}。`); };
+  const nextMonth = () => { if (state.ending || pending) return; setState((current) => advanceMonth(current)); setNotice(""); };
+  const resolve = (optionId: string) => { if (!pending) return; setState((current) => resolveMemorial(current, pending.id, optionId)); setNotice(""); };
   return <div className="app-shell">
     <header className="topbar"><div><p className="eyebrow">哎呀，朕的皇朝怎么又亡啦</p><h1>景和朝 · 主城区</h1></div><div className="topbar-actions"><span className="prototype-tag">PROTOTYPE V0.4 · CORE LOOP</span><button className="secondary-button" onClick={() => setState(newGame())}>重新开始</button></div></header>
     <main>
       <section className="hero-panel"><div><span className="section-kicker">当前时刻</span><div className="date-line"><h2>{formatReignDate(state)}</h2><span className="age-pill">皇帝 {state.emperor.age} 岁</span></div><p className="hero-copy">四大势力是王朝存亡的直接原因。你需要让士族、武将、百姓、豪强保持在可接受范围，同时用主城建设解决粮食、军备和财政问题。</p></div><div className="reign-progress"><div className="progress-label"><span>三十年国运</span><strong>{state.time.totalMonths} / 360 月</strong></div><div className="progress-track"><span style={{ width: `${progress}%` }} /></div></div></section>
-
       <section className={`crisis-panel ${crisisPressure >= 76 ? "crisis-panel--collapse" : crisisPressure >= 51 ? "crisis-panel--crisis" : crisisPressure >= 26 ? "crisis-panel--tense" : ""}`}><div className="crisis-panel__heading"><div><span className="section-kicker">王朝存亡总览</span><div className="crisis-panel__title-line"><h2>势力危机压力</h2><span className="crisis-status-pill">{crisisPressure} / 100</span></div></div></div><div className="crisis-panel__body"><div className="crisis-pressure-track"><span style={{ width: `${crisisPressure}%` }} /></div><p>最低势力满意度：<b>{lowestFaction} / 100</b>。满意度持续下降会增加积怨，并最终触发民变、兵变、政变或地方割据。</p><span className="crisis-panel__hint">不要只盯资源库存：真正导致王朝崩溃的是势力关系失控。</span></div></section>
-
       {pending && <section className="event-card"><div className="event-card__header"><div><p className="event-card__eyebrow">朝堂急报 · {pending.source}</p><h2>{pending.title}</h2></div><span className="event-card__threat">{pending.urgency === "high" ? "危急" : pending.urgency === "low" ? "缓急" : "要务"}</span></div><p className="event-card__description">{pending.description}</p><div className="event-actions">{pending.options.map((option: MemorialOption) => <button className="event-action" key={option.id} onClick={() => resolve(option.id)}><strong>{option.label}</strong><span>{option.description}</span></button>)}</div></section>}
-
       <section className="resource-grid" aria-label="国家资源">{resourceLabels.map(([key, label, unit]) => <article className={`resource-card resource-card--${key}`} key={key}><span className="resource-label">{label}</span><strong>{number(state.resources[key])}</strong>{unit && <small>{unit}</small>}{delta[key] !== undefined && <span className={`resource-delta ${delta[key]! >= 0 ? "resource-delta--positive" : "resource-delta--negative"}`}>{deltaText(delta[key]!)} / 月</span>}</article>)}</section>
-
       <section className="capital-block"><div className="section-title-row"><div><span className="section-kicker">主城建设 · 六大建筑</span><h2>每座建筑独立升级</h2></div><span className="section-note">{state.buildings.filter((b) => b.provinceId === "central").length} / 6 已建</span></div><div className="capital-intro"><span className="capital-intro__icon">城</span><p>官仓、国库、兵营、武库、工部作坊、市舶司分别承担粮食、财政、军队、军备和贸易职能。每座建筑都可独立升级到 Lv.5。</p></div><div className="building-grid">{buildingOrder.map((id) => <BuildingCard key={id} id={id} state={state} onBuild={handleBuild} />)}</div>{notice && <p className="build-notice">{notice}</p>}</section>
-
-      <div className="content-grid">
-        <section className="section-block faction-section"><div className="section-title-row"><div><span className="section-kicker">第一优先级 · 王朝存亡</span><h2>四大势力</h2></div><span className="section-note">满意度必须一眼看清</span></div><div className="faction-list">{state.factions.map((faction) => <FactionCard key={faction.id} faction={faction} />)}</div></section>
-        <section className="section-block"><div className="section-title-row"><div><span className="section-kicker">地方概况</span><h2>五州</h2></div><span className="section-note">天灾与叛乱通过奏折上报</span></div><div className="province-grid">{state.provinces.map((p) => <article className="province-card" key={p.id}><div className="card-heading"><div><h3>{p.name}</h3><span className="muted">人口 {number(p.population)} 万</span></div><span className="status-dot" /></div><div className="province-metrics"><span><b>粮食</b>{p.food}</span><span><b>财赋</b>{p.treasury}</span><span><b>治安</b>{p.security}</span><span><b>民心</b>{p.morale}</span></div><div className="card-footer"><span>忠诚 {p.localLoyalty}</span><span>驻军 {p.militaryPresence}</span></div></article>)}</div></section>
-      </div>
-
-      <section className="bottom-grid"><section className="history-block"><div className="section-title-row"><div><span className="section-kicker">留痕</span><h2>历史日志</h2></div></div>{state.history.length ? <div className="history-list">{[...state.history].reverse().slice(0, 8).map((h) => <div className="history-row" key={h.totalMonths}><span>{formatReignDate({ emperor: state.emperor, time: { totalMonths: h.totalMonths, year: h.year, month: h.month } })}</span><span className="muted">{h.events.length ? `急报 ${h.events.length} 件` : "经营结算"}</span></div>)}</div> : <div className="empty-state"><span className="empty-icon">册</span><p>尚未结算第一个月。</p></div>}</section><aside className="advance-card"><span className="section-kicker">月度操作</span><h2>{pending ? "先裁决，再理政" : "进入下个月"}</h2><p>{pending ? "奏折正在等待圣裁。处理后才能继续月度结算。" : "月结会先结算建筑、军队和兵营粮食消耗。若粮食不足，将损失部分农民与士兵，并降低百姓、武将满意度。"}</p><button className="primary-button" disabled={Boolean(state.ending) || Boolean(pending)} onClick={nextMonth}>{state.ending ? "三十年已毕" : pending ? "等待急报裁决" : "结算经营 · 进入下月"}<span>→</span></button></aside></section>
-    </main><footer className="app-footer">主城经营原型 · 六大建筑独立升级 · 军队/兵营军粮消耗 · 四大势力满意度决定王朝存亡</footer>
+      <div className="content-grid"><section className="section-block faction-section"><div className="section-title-row"><div><span className="section-kicker">第一优先级 · 王朝存亡</span><h2>四大势力</h2></div><span className="section-note">满意度必须一眼看清</span></div><div className="faction-list">{state.factions.map((faction) => <FactionCard key={faction.id} faction={faction} />)}</div></section><section className="section-block"><div className="section-title-row"><div><span className="section-kicker">地方概况</span><h2>五州</h2></div><span className="section-note">天灾与叛乱通过奏折上报</span></div><div className="province-grid">{state.provinces.map((p) => <article className="province-card" key={p.id}><div className="card-heading"><div><h3>{p.name}</h3><span className="muted">人口 {number(p.population)} 万</span></div><span className="status-dot" /></div><div className="province-metrics"><span><b>粮食</b>{p.food}</span><span><b>财赋</b>{p.treasury}</span><span><b>治安</b>{p.security}</span><span><b>民心</b>{p.morale}</span></div><div className="card-footer"><span>忠诚 {p.localLoyalty}</span><span>驻军 {p.militaryPresence}</span></div></article>)}</div></section></div>
+      <section className="bottom-grid"><section className="history-block"><div className="section-title-row"><div><span className="section-kicker">留痕</span><h2>历史日志</h2></div></div>{state.history.length ? <div className="history-list">{[...state.history].reverse().slice(0, 8).map((h) => <div className="history-row" key={h.totalMonths}><span>{formatReignDate({ emperor: state.emperor, time: { totalMonths: h.totalMonths, year: h.year, month: h.month } })}</span><span className="muted">{h.events.length ? `急报 ${h.events.length} 件` : "经营结算"}</span></div>)}</div> : <div className="empty-state"><span className="empty-icon">册</span><p>尚未结算第一个月。</p></div>}</section><aside className="advance-card"><span className="section-kicker">月度操作</span><h2>{pending ? "先裁决，再理政" : "准备进入下个月"}</h2><p>{pending ? "朝堂还有未处理的奏折。先做出决定，朕才能继续推进国运。" : "所有建设、资源和势力状态确认后，再推进一个月。"}</p><button className="primary-button" disabled={Boolean(state.ending || pending)} onClick={nextMonth}>{state.ending ? "本局已结束" : pending ? "先处理奏折" : "进入下个月 →"}</button></aside></section>
+    </main>
+    <div className={`month-action-bar ${pending ? "month-action-bar--pending" : ""}`}><div className="month-action-bar__info"><span className="month-action-bar__eyebrow">月度操作</span><strong>{pending ? "朝堂还有奏折待裁决" : `景和${state.time.year}年 · 第${state.time.month}月`}</strong><span>{pending ? "处理完成后即可继续" : "确认当前决策后推进国运"}</span></div><button className="month-action-bar__button" disabled={Boolean(state.ending || pending)} onClick={nextMonth}>{state.ending ? "本局已结束" : pending ? "先处理奏折" : "进入下个月 →"}</button></div>
   </div>;
 }
 export default App;
