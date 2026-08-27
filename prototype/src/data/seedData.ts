@@ -42,20 +42,21 @@ const factionDefaults: Record<
   FactionId,
   Pick<FactionState, "wealth" | "organization" | "resentment" | "fear">
 > = {
-  gentry: { wealth: 72, organization: 68, resentment: 0, fear: 8 },
-  military: { wealth: 58, organization: 76, resentment: 0, fear: 12 },
-  peasants: { wealth: 40, organization: 36, resentment: 0, fear: 5 },
-  landlords: { wealth: 84, organization: 62, resentment: 0, fear: 10 },
+  gentry: { wealth: 72, organization: 68, resentment: 8, fear: 8 },
+  military: { wealth: 58, organization: 76, resentment: 10, fear: 12 },
+  peasants: { wealth: 40, organization: 36, resentment: 12, fear: 5 },
+  landlords: { wealth: 84, organization: 62, resentment: 9, fear: 10 },
 };
 
 const initialResources: NationalResources = {
-  // Provisional Sprint 1 values. Economy and upkeep are intentionally not simulated yet.
-  treasury: 32_000,
-  food: 30_000,
-  weapons: 6_000,
-  army: 5_400,
-  authority: 68,
-  morale: 61,
+  // V0.3 deliberately starts tight: building an economy is a meaningful
+  // opening decision, while a few months of reserve still remain.
+  treasury: 8_000,
+  food: 7_000,
+  weapons: 1_200,
+  army: 1_800,
+  authority: 45,
+  morale: 42,
 };
 
 const asProvinceId = (id: string): ProvinceId => {
@@ -81,11 +82,13 @@ function createProvinces(): ProvinceState[] {
       population: province.population,
       food: province.food,
       treasury: province.treasury,
-      security: province.security,
-      morale: province.morale,
-      corruption: province.corruption,
+      // The new emperor inherits a country that is functional, but brittle:
+      // low security/morale and elevated corruption make early choices matter.
+      security: Math.max(20, province.security - 10),
+      morale: Math.max(20, province.morale - 10),
+      corruption: Math.min(90, province.corruption + 8),
       localLoyalty: province.local_loyalty,
-      rebellionRisk: 0,
+      rebellionRisk: 12,
       gentryInfluence: province.gentry_influence,
       landlordInfluence: province.landlord_influence,
       militaryPresence: province.garrison,
@@ -102,7 +105,9 @@ function createFactions(): FactionState[] {
     return {
       id: asFactionId(raw.id),
       name: raw.name,
-      satisfaction: raw.satisfaction,
+      // The founding court is already fractured.  Raw faction data describes
+      // the pre-war baseline; the new emperor starts fifteen points below it.
+      satisfaction: Math.max(20, raw.satisfaction - 15),
       influence: raw.influence,
       ...factionDefaults[id],
     };
@@ -114,11 +119,15 @@ export function newGame(): GameState {
     time: { totalMonths: 0, year: 1, month: 1 },
     emperor: { age: STARTING_AGE, reignTitle: REIGN_TITLE },
     resources: { ...initialResources },
+    // The capital starts undeveloped so the first decisions are construction
+    // choices rather than an automatic stream of resources.
+    buildings: [],
     provinces: createProvinces(),
     factions: createFactions(),
     activeModifiers: [],
     activeEvents: [],
     pendingMemorials: [],
+    crisis: null,
     unlockedSkills: [],
     history: [],
     ending: null,

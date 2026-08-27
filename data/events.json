@@ -1,17 +1,262 @@
 {
-  "version": "0.1",
+  "version": "0.3",
   "events": [
-    {"id":"EV001","name":"旱灾","category":"disaster","base_probability":0.02,"conditions":["food<50"]},
-    {"id":"EV002","name":"洪灾","category":"disaster","base_probability":0.02,"conditions":[]},
-    {"id":"EV003","name":"蝗灾","category":"disaster","base_probability":0.01,"conditions":["food<70"]},
-    {"id":"EV004","name":"粮荒","category":"livelihood","base_probability":0.01,"conditions":["food<40"]},
-    {"id":"EV005","name":"土匪","category":"security","base_probability":0.02,"conditions":["security<60"]},
-    {"id":"EV006","name":"民变","category":"political","base_probability":0.01,"conditions":["morale<40"]},
-    {"id":"EV007","name":"官员贪腐","category":"political","base_probability":0.02,"conditions":["corruption>40"]},
-    {"id":"EV008","name":"士族冲突","category":"political","base_probability":0.01,"conditions":["gentry_influence>70"]},
-    {"id":"EV009","name":"军队欠饷","category":"military","base_probability":0.02,"conditions":["treasury<3000"]},
-    {"id":"EV010","name":"豪强抗税","category":"political","base_probability":0.01,"conditions":["landlord_influence>70"]},
-    {"id":"EV011","name":"海外贸易机会","category":"foreign_trade","base_probability":0.01,"conditions":[]},
-    {"id":"EV012","name":"东瀛内乱","category":"war","base_probability":0.005,"conditions":["military>=30"]}
+    {
+      "id": "EV000",
+      "name": "国初三司议",
+      "category": "tutorial",
+      "base_probability": 1,
+      "conditions": [],
+      "description": "新朝初立，三司把一年的储备与用度摊在御前。朕要先决定，把第一笔余粮和银钱押在哪里。",
+      "source": "中书省·开国议案",
+      "urgency": "normal",
+      "options": [
+        {"id": "open_market", "label": "扶持民营", "description": "拨银兴市，让商路先替朝廷滚出现金。", "benefits": ["landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -2500}, {"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 3}]},
+        {"id": "observe_first", "label": "暂观其变", "description": "先保留储备，听取更多州府消息，再决定建设方向。", "benefits": ["landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -1}]},
+        {"id": "drill_guard", "label": "整军备战", "description": "把兵器和军饷投向兵营，先把刀握在自己手里。", "benefits": ["military"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1600}, {"type": "resource_delta", "resource": "weapons", "amount": 300}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 6}]},
+        {"id": "open_granary", "label": "开仓安民", "description": "拨出一小批粮食给京畿百姓，换来一段安稳的开局。", "benefits": ["peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -800}, {"type": "resource_delta", "resource": "morale", "amount": 4}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 7}]}
+      ]
+    },
+    {
+      "id": "EV001",
+      "name": "旱灾",
+      "category": "disaster",
+      "base_probability": 0.08,
+      "conditions": ["food<12000"],
+      "description": "赤地延绵，田里的禾苗还未抽穗便卷成了针。地方官请求朝廷立刻定夺。",
+      "source": "北朔急报",
+      "urgency": "high",
+      "options": [
+        {"id": "relief", "label": "开仓赈济", "description": "消耗储粮和银钱，保住民心与治安。", "benefits": ["peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -3000}, {"type": "resource_delta", "resource": "treasury", "amount": -1200}, {"type": "resource_delta", "resource": "morale", "amount": 6}, {"type": "province_delta", "province_id": "north_shuo", "security": 4, "rebellionRisk": -8}]},
+        {"id": "levy", "label": "征调富户", "description": "让豪强交粮入仓，国库不伤但地方怨气上升。", "benefits": ["military"], "costs": ["landlords", "peasants"], "effects": [{"type": "resource_delta", "resource": "food", "amount": 1200}, {"type": "resource_delta", "resource": "treasury", "amount": 1400}, {"type": "resource_delta", "resource": "morale", "amount": -7}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -9, "resentment": 8}, {"type": "province_delta", "province_id": "north_shuo", "rebellionRisk": 8}]},
+        {"id": "strict_order", "label": "强令抗旱", "description": "命军屯与民夫一起抢水，先保住下一季收成。", "benefits": ["military"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -700}, {"type": "resource_delta", "resource": "food", "amount": -300}, {"type": "province_delta", "province_id": "north_shuo", "security": 8, "rebellionRisk": -4}, {"type": "spawn_event", "eventId": "EV005"}]}
+      ]
+    },
+    {
+      "id": "EV002",
+      "name": "洪灾",
+      "category": "disaster",
+      "base_probability": 0.08,
+      "conditions": [],
+      "description": "河堤在夜里决口，数县田舍尽没。灾民正沿着官道涌向州城。",
+      "source": "河东水驿",
+      "urgency": "high",
+      "options": [
+        {"id": "repair_dikes", "label": "抢修堤坝", "description": "花钱调工，止住下一轮水患。", "benefits": ["peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -2200}, {"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "province_delta", "province_id": "he_dong", "security": 5, "morale": 4, "rebellionRisk": -7}]},
+        {"id": "move_grain", "label": "急运赈粮", "description": "先救人再说，粮库会立刻见底一截。", "benefits": ["peasants"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -3600}, {"type": "resource_delta", "resource": "morale", "amount": 8}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 7}]}
+      ]
+    },
+    {
+      "id": "EV003",
+      "name": "蝗灾",
+      "category": "disaster",
+      "base_probability": 0.07,
+      "conditions": ["food<18000"],
+      "description": "蝗群遮天蔽日，地方百姓请朝廷下诏组织捕杀。",
+      "source": "江南观察使",
+      "urgency": "high",
+      "options": [
+        {"id": "mobilize", "label": "发动捕蝗", "description": "动用民力控制损失，民心略有损耗。", "benefits": ["peasants", "military"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1000}, {"type": "resource_delta", "resource": "food", "amount": -1200}, {"type": "province_delta", "province_id": "jiangnan", "rebellionRisk": -5, "security": 2}]},
+        {"id": "pray", "label": "祭天祈雨", "description": "保住国库，却把希望交给天意。", "benefits": ["gentry"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -4}, {"type": "resource_delta", "resource": "morale", "amount": -5}, {"type": "province_delta", "province_id": "jiangnan", "food": -10, "rebellionRisk": 6}]}
+      ]
+    },
+    {
+      "id": "EV004",
+      "name": "粮荒",
+      "category": "livelihood",
+      "base_probability": 0.1,
+      "conditions": ["food<10000"],
+      "description": "粮价一日三涨，城门外已经有人排队求粥。再拖一个月，饥民就会变成流民。",
+      "source": "中州巡按",
+      "urgency": "high",
+      "options": [
+        {"id": "porridge", "label": "设粥棚", "description": "大幅消耗存粮，换回民心和秩序。", "benefits": ["peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -4200}, {"type": "resource_delta", "resource": "morale", "amount": 10}, {"type": "province_delta", "province_id": "central", "security": 5, "rebellionRisk": -10}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 8}]},
+        {"id": "raise_tax", "label": "加征粮税", "description": "用强硬手段补仓，短期有粮但百姓怨气翻涌。", "benefits": ["landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "food", "amount": 2200}, {"type": "resource_delta", "resource": "treasury", "amount": 800}, {"type": "resource_delta", "resource": "morale", "amount": -12}, {"type": "province_delta", "province_id": "central", "rebellionRisk": 12}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": -10, "resentment": 12}]}
+      ]
+    },
+    {
+      "id": "EV005",
+      "name": "土匪",
+      "category": "security",
+      "base_probability": 0.11,
+      "conditions": ["security<60"],
+      "description": "山路被匪帮截断，商旅不敢过境，地方豪强也开始私自募兵。",
+      "source": "岭南塘报",
+      "urgency": "high",
+      "options": [
+        {"id": "send_troops", "label": "派兵剿匪", "description": "消耗军粮和兵器，把治安夺回来。", "benefits": ["military", "peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -1600}, {"type": "resource_delta", "resource": "weapons", "amount": -180}, {"type": "resource_delta", "resource": "army", "amount": -80}, {"type": "province_delta", "province_id": "lingnan", "security": 14, "rebellionRisk": -12}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 5}]},
+        {"id": "buy_off", "label": "招安收编", "description": "用银钱换暂时安静，地方官担心养虎为患。", "benefits": ["landlords"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1800}, {"type": "resource_delta", "resource": "authority", "amount": -3}, {"type": "province_delta", "province_id": "lingnan", "security": 6, "rebellionRisk": 4}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 5}]}
+      ]
+    },
+    {
+      "id": "EV006",
+      "name": "民变",
+      "category": "political",
+      "base_probability": 0.09,
+      "conditions": ["morale<40"],
+      "description": "饥民砸开县仓，号称要替天行道。镇压会留下血债，退让会动摇朝廷威信。",
+      "source": "中州急递",
+      "urgency": "high",
+      "options": [
+        {"id": "suppress", "label": "调军镇压", "description": "迅速恢复秩序，但民心和军队都会付出代价。", "benefits": ["military", "gentry"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "army", "amount": -160}, {"type": "resource_delta", "resource": "authority", "amount": 4}, {"type": "resource_delta", "resource": "morale", "amount": -10}, {"type": "province_delta", "province_id": "central", "security": 10, "rebellionRisk": 15}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": -14, "resentment": 18}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 4}]},
+        {"id": "pardon", "label": "赦免安抚", "description": "承认民间疾苦，以粮食和赦令换取停手。", "benefits": ["peasants"], "costs": ["military", "gentry"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -2600}, {"type": "resource_delta", "resource": "authority", "amount": -5}, {"type": "resource_delta", "resource": "morale", "amount": 9}, {"type": "province_delta", "province_id": "central", "security": -4, "rebellionRisk": -15}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 12}, {"type": "faction_delta", "faction_id": "military", "satisfaction": -5}]}
+      ]
+    },
+    {
+      "id": "EV007",
+      "name": "官员贪腐",
+      "category": "political",
+      "base_probability": 0.1,
+      "conditions": ["corruption>40"],
+      "description": "账册上的赈粮凭空少了一半，查下去会牵出一串地方门生。",
+      "source": "御史密折",
+      "urgency": "normal",
+      "options": [
+        {"id": "audit", "label": "彻查到底", "description": "追回赃款并立威，但会得罪士族与地方官。", "benefits": ["peasants"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 1800}, {"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": -8, "resentment": 7}, {"type": "province_delta", "province_id": "central", "corruption": -16}]},
+        {"id": "cover_up", "label": "留有余地", "description": "收回小半银钱，换取官场暂时稳定。", "benefits": ["gentry"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 700}, {"type": "resource_delta", "resource": "authority", "amount": -2}, {"type": "province_delta", "province_id": "central", "corruption": 8}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": 5}]}
+      ]
+    },
+    {
+      "id": "EV008",
+      "name": "士族冲突",
+      "category": "political",
+      "base_probability": 0.08,
+      "conditions": ["gentry_influence>70"],
+      "description": "两派士族为一纸诏令争得不可开交，地方官已经拒绝互相盖印。",
+      "source": "门下省驳议",
+      "urgency": "normal",
+      "options": [
+        {"id": "appoint", "label": "强行裁定", "description": "皇权压下争论，士族会记住这次羞辱。", "benefits": ["military"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 5}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": -12, "resentment": 12}]},
+        {"id": "compromise", "label": "两派各退", "description": "让出部分官位，换取政令继续运转。", "benefits": ["gentry", "peasants"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -900}, {"type": "resource_delta", "resource": "authority", "amount": -2}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": 8}, {"type": "province_delta", "province_id": "central", "corruption": 5}]}
+      ]
+    },
+    {
+      "id": "EV009",
+      "name": "军队欠饷",
+      "category": "military",
+      "base_probability": 0.12,
+      "conditions": ["treasury<8000"],
+      "description": "边军三月未领军饷，军中开始传唱‘只认饷不认诏’。",
+      "source": "北朔军报",
+      "urgency": "high",
+      "options": [
+        {"id": "pay", "label": "优先发饷", "description": "割肉保军心，边军会替朝廷守住防线。", "benefits": ["military", "peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -3000}, {"type": "resource_delta", "resource": "food", "amount": -1000}, {"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 12, "resentment": -8}]},
+        {"id": "promise", "label": "先许空饷", "description": "保住现银，但军心滑坡，下一次会更难收拾。", "benefits": ["landlords"], "costs": ["military", "peasants"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -5}, {"type": "resource_delta", "resource": "morale", "amount": -4}, {"type": "province_delta", "province_id": "north_shuo", "security": -9, "rebellionRisk": 10}, {"type": "faction_delta", "faction_id": "military", "satisfaction": -14, "resentment": 14}]}
+      ]
+    },
+    {
+      "id": "EV010",
+      "name": "豪强抗税",
+      "category": "political",
+      "base_probability": 0.09,
+      "conditions": ["landlord_influence>70"],
+      "description": "地方豪强联名拒缴新税，还把县衙的催粮吏赶出了庄园。",
+      "source": "江南转运使",
+      "urgency": "normal",
+      "options": [
+        {"id": "enforce", "label": "派使追税", "description": "收回税银，豪强会把这当成对地方权力的宣战。", "benefits": ["peasants", "military"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 2400}, {"type": "resource_delta", "resource": "authority", "amount": 4}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -12, "resentment": 14}, {"type": "province_delta", "province_id": "jiangnan", "rebellionRisk": 8}]},
+        {"id": "negotiate", "label": "议税换粮", "description": "给地方一成好处，换他们继续把粮道接上。", "benefits": ["landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "food", "amount": 1800}, {"type": "resource_delta", "resource": "authority", "amount": -3}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 9, "wealth": 6}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": -4}]}
+      ]
+    },
+    {
+      "id": "EV011",
+      "name": "海外贸易机会",
+      "category": "foreign_trade",
+      "base_probability": 0.1,
+      "conditions": [],
+      "description": "海商带来稀罕货物，请求朝廷开放港口并给出护航。押对了是财路，押错了就是海盗的门票。",
+      "source": "岭南市舶司",
+      "urgency": "low",
+      "options": [
+        {"id": "open_port", "label": "开放港口", "description": "投资护航后坐收商税，豪强和商人会更富。", "benefits": ["landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 2800}, {"type": "resource_delta", "resource": "authority", "amount": 2}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 6, "wealth": 8}]},
+        {"id": "close_port", "label": "谨慎封港", "description": "不冒风险，但朝廷错过一条新财路。", "benefits": ["peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 1}, {"type": "resource_delta", "resource": "morale", "amount": -1}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -4}]}
+      ]
+    },
+    {
+      "id": "EV012",
+      "name": "东瀛内乱",
+      "category": "war",
+      "base_probability": 0.06,
+      "conditions": ["military>=30"],
+      "description": "东海商路传来求援信，对方愿以港口贸易换取大梁出兵。",
+      "source": "鸿胪寺密报",
+      "urgency": "high",
+      "options": [
+        {"id": "expedition", "label": "出兵护航", "description": "消耗兵器、粮食和军队，赢了就得到海贸与威望。", "benefits": ["military", "landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 4200}, {"type": "resource_delta", "resource": "food", "amount": -3800}, {"type": "resource_delta", "resource": "weapons", "amount": -500}, {"type": "resource_delta", "resource": "army", "amount": -260}, {"type": "resource_delta", "resource": "authority", "amount": 8}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 10}, {"type": "state_modifier", "id": "trade_route", "name": "东海贸易航线", "durationMonths": 6}]},
+        {"id": "stay_home", "label": "按兵不动", "description": "守住国内储备，军将会认为朝廷错失军功。", "benefits": ["peasants"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -2}, {"type": "resource_delta", "resource": "treasury", "amount": 600}, {"type": "faction_delta", "faction_id": "military", "satisfaction": -7, "resentment": 7}]}
+      ]
+    },
+    {
+      "id": "EV013", "name": "盐场亏空", "category": "economy", "tier": "stable", "base_probability": 0.12, "conditions": ["treasury<18000"], "description": "盐场账目少了三成，盐商说是水患，巡盐御史却递上了另一套账。", "source": "度支司·盐课急报", "urgency": "normal", "options": [
+        {"id": "audit_salt", "label": "彻查盐账", "description": "追回银两并整肃盐场，地方士绅会暂时收敛。", "benefits": ["peasants", "gentry"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 1600}, {"type": "resource_delta", "resource": "authority", "amount": 2}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -7, "resentment": 6}]},
+        {"id": "license_salt", "label": "放宽盐引", "description": "给商人一条活路，换现银入库但官府威信受损。", "benefits": ["landlords"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 2200}, {"type": "resource_delta", "resource": "authority", "amount": -2}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 6, "wealth": 5}]}
+      ]
+    },
+    {
+      "id": "EV014", "name": "漕运堵塞", "category": "livelihood", "tier": "tense", "base_probability": 0.1, "conditions": ["food<22000"], "description": "漕船在浅滩连成一线，京城粮价开始上扬，船户与仓官互相指责。", "source": "漕运总督·八百里加急", "urgency": "high", "options": [
+        {"id": "dredge_canal", "label": "疏浚河道", "description": "先花钱抢通粮道，后续数月粮运会更稳。", "benefits": ["peasants", "military"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1800}, {"type": "resource_delta", "resource": "food", "amount": 2600}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 4}]},
+        {"id": "seize_barges", "label": "征用商船", "description": "立即调船解燃眉之急，但商路和士绅怨气都会上升。", "benefits": ["military"], "costs": ["landlords", "gentry"], "effects": [{"type": "resource_delta", "resource": "food", "amount": 1700}, {"type": "resource_delta", "resource": "authority", "amount": -3}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -8, "resentment": 8}]}
+      ]
+    },
+    {
+      "id": "EV015", "name": "边关烽烟", "category": "war", "tier": "crisis", "base_probability": 0.08, "conditions": ["military<45"], "description": "北境烽火一夜三起，守将称敌骑已越过旧界，朝廷必须决定援军去向。", "source": "北朔都护府·血书", "urgency": "high", "options": [
+        {"id": "reinforce_border", "label": "发兵驰援", "description": "用粮、兵器和军队守住边墙，军心因此大振。", "benefits": ["military", "gentry"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "food", "amount": -2400}, {"type": "resource_delta", "resource": "weapons", "amount": -420}, {"type": "resource_delta", "resource": "army", "amount": -180}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 12}, {"type": "province_delta", "province_id": "north_shuo", "security": 14, "rebellionRisk": -8}]},
+        {"id": "fortify_capital", "label": "固守京畿", "description": "保留兵力护卫京城，但边军失望、边地风险继续上升。", "benefits": ["gentry"], "costs": ["military", "peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -800}, {"type": "resource_delta", "resource": "authority", "amount": -4}, {"type": "faction_delta", "faction_id": "military", "satisfaction": -10, "resentment": 10}, {"type": "province_delta", "province_id": "north_shuo", "security": -12, "rebellionRisk": 10}]}
+      ]
+    },
+    {
+      "id": "EV016", "name": "疫病入城", "category": "disaster", "tier": "crisis", "base_probability": 0.07, "conditions": ["morale<55"], "description": "城中出现高热与咳血，医官请求封坊，商贾却担心停市会让百姓断粮。", "source": "太医院·红签", "urgency": "high", "options": [
+        {"id": "quarantine", "label": "封坊施药", "description": "停市救人，民心与治安稳住，但国库会明显缩水。", "benefits": ["peasants", "gentry"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -2200}, {"type": "resource_delta", "resource": "morale", "amount": 8}, {"type": "province_delta", "province_id": "central", "security": 6, "rebellionRisk": -8}]},
+        {"id": "keep_market", "label": "维持市集", "description": "保住税收与粮路，染病会继续扩散，民心和治安下降。", "benefits": ["landlords"], "costs": ["peasants", "gentry"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 1300}, {"type": "resource_delta", "resource": "morale", "amount": -10}, {"type": "province_delta", "province_id": "central", "security": -7, "rebellionRisk": 12}]}
+      ]
+    },
+    {
+      "id": "EV017", "name": "宫门谣言", "category": "political", "tier": "tense", "base_probability": 0.11, "conditions": ["authority<55"], "description": "宫门外流言说陛下久病不朝，几位重臣已经开始私下交换名单。", "source": "内侍省·密闻", "urgency": "normal", "options": [
+        {"id": "public_audience", "label": "亲临朝会", "description": "当众稳住朝局，皇权上升但会触怒想掌控朝议的士族。", "benefits": ["peasants", "military"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 7}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": -8, "resentment": 5}]},
+        {"id": "buy_loyalty", "label": "厚赏重臣", "description": "用银钱换忠诚，暂时平息流言但国库承压。", "benefits": ["gentry", "landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -2400}, {"type": "resource_delta", "resource": "authority", "amount": 2}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": 8, "wealth": 6}]}
+      ]
+    },
+    {
+      "id": "EV018", "name": "军械工坊失火", "category": "military", "tier": "tense", "base_probability": 0.09, "conditions": ["weapons<5000"], "description": "军械库夜半起火，箭矢与火药损失大半，工匠怀疑有人纵火。", "source": "将作监·火签", "urgency": "normal", "options": [
+        {"id": "rebuild_workshop", "label": "重建工坊", "description": "砸银子恢复兵器产线，军方满意，民间工匠得到活路。", "benefits": ["military", "peasants"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1900}, {"type": "resource_delta", "resource": "weapons", "amount": 420}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 7}]},
+        {"id": "investigate_fire", "label": "严查纵火", "description": "立刻锁拿嫌犯，皇权更硬，但工坊停摆一个月。", "benefits": ["gentry"], "costs": ["military", "landlords"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 5}, {"type": "resource_delta", "resource": "weapons", "amount": -280}, {"type": "faction_delta", "faction_id": "military", "satisfaction": -5, "resentment": 6}]}
+      ]
+    },
+    {
+      "id": "EV019", "name": "学宫请愿", "category": "culture", "tier": "stable", "base_probability": 0.12, "conditions": ["authority>60"], "description": "京畿学子请开新学宫，士族愿意出资，但百姓担心朝廷只养清谈。", "source": "国子监·联名奏", "urgency": "low", "options": [
+        {"id": "fund_academy", "label": "拨款兴学", "description": "培养官吏与人才，皇权获得长期声望，国库先付一笔。", "benefits": ["gentry", "peasants"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1400}, {"type": "resource_delta", "resource": "authority", "amount": 4}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": 7}]},
+        {"id": "defer_academy", "label": "缓办学宫", "description": "把银粮留给军政急务，学子不满但军队得到保障。", "benefits": ["military"], "costs": ["gentry", "peasants"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -2}, {"type": "resource_delta", "resource": "treasury", "amount": 500}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": -5, "resentment": 4}]}
+      ]
+    },
+    {
+      "id": "EV020", "name": "河工徭役", "category": "livelihood", "tier": "tense", "base_probability": 0.1, "conditions": ["rebellion_risk>25"], "description": "河工缺人，地方官请求征调民夫；服役能保堤，不服役则明年又要淹田。", "source": "河道总督·工役册", "urgency": "normal", "options": [
+        {"id": "pay_workers", "label": "发钱募工", "description": "用国库换自愿劳力，堤坝更牢，百姓怨气较轻。", "benefits": ["peasants", "landlords"], "costs": ["military"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -2100}, {"type": "resource_delta", "resource": "morale", "amount": 5}, {"type": "province_delta", "province_id": "he_dong", "security": 4, "rebellionRisk": -10}]},
+        {"id": "force_labor", "label": "强征民夫", "description": "不花现银快速开工，但百姓怨气会把叛乱风险推高。", "benefits": ["gentry"], "costs": ["peasants", "landlords"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 600}, {"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "province_delta", "province_id": "he_dong", "morale": -8, "rebellionRisk": 18}]}
+      ]
+    },
+    {
+      "id": "EV021", "name": "商路护送", "category": "foreign_trade", "tier": "stable", "base_probability": 0.11, "conditions": ["security>=60"], "description": "西域商队请求官军护送入京，承诺以稀金和香料缴纳重税。", "source": "鸿胪寺·商队文书", "urgency": "low", "options": [
+        {"id": "escort_caravan", "label": "派军护送", "description": "军队赚得军功，商路带来税银，但要消耗军粮。", "benefits": ["military", "landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 2600}, {"type": "resource_delta", "resource": "food", "amount": -900}, {"type": "faction_delta", "faction_id": "military", "satisfaction": 5}]},
+        {"id": "tax_caravan", "label": "重税放行", "description": "不派兵也能收银，但商队可能转道，地方势力会趁机抬价。", "benefits": ["landlords"], "costs": ["peasants", "military"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 1500}, {"type": "resource_delta", "resource": "authority", "amount": -1}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 4}]}
+      ]
+    },
+    {
+      "id": "EV022", "name": "州府互讼", "category": "political", "tier": "tense", "base_probability": 0.1, "conditions": ["local_loyalty<65"], "description": "两州为盐道与边界互递讼书，地方官开始拒绝共享税册，政令被卡在路上。", "source": "门下省·州讼抄本", "urgency": "normal", "options": [
+        {"id": "send_inspector", "label": "派钦差查勘", "description": "让中央裁判边界，皇权上升但地方官会暂时抱团。", "benefits": ["peasants", "military"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": -1000}, {"type": "resource_delta", "resource": "authority", "amount": 5}, {"type": "province_delta", "localLoyalty": 6, "corruption": -5}]},
+        {"id": "let_them_settle", "label": "令其自议", "description": "中央省钱省事，地方势力得到面子，但忠诚与秩序继续下滑。", "benefits": ["gentry", "landlords"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "treasury", "amount": 700}, {"type": "resource_delta", "resource": "authority", "amount": -3}, {"type": "province_delta", "localLoyalty": -8, "rebellionRisk": 7}]}
+      ]
+    },
+    {
+      "id": "EV023", "name": "宗室请田", "category": "court", "tier": "stable", "base_probability": 0.08, "conditions": ["authority>50"], "description": "宗室请求赐田养府，答应可换来宗亲拥护，拒绝则会在朝会上频频掣肘。", "source": "宗正寺·请田状", "urgency": "low", "options": [
+        {"id": "grant_land", "label": "赐田安宗", "description": "用土地换宗室安稳，豪强坐大、百姓可耕地减少。", "benefits": ["landlords", "gentry"], "costs": ["peasants"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 3}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": 6, "wealth": 8}, {"type": "province_delta", "province_id": "central", "rebellionRisk": 4}]},
+        {"id": "deny_princes", "label": "驳回请田", "description": "守住民田和皇权，宗室不满但百姓会记住这份克制。", "benefits": ["peasants", "military"], "costs": ["landlords"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 4}, {"type": "resource_delta", "resource": "morale", "amount": 3}, {"type": "faction_delta", "faction_id": "landlords", "satisfaction": -7, "resentment": 8}]}
+      ]
+    },
+    {
+      "id": "EV024", "name": "天象示警", "category": "omen", "tier": "crisis", "base_probability": 0.06, "conditions": ["authority<45"], "description": "彗星横过夜空，百官以天变为由请求改元或大赦，民间则等待皇帝表态。", "source": "司天监·观星录", "urgency": "high", "options": [
+        {"id": "great_amnesty", "label": "大赦天下", "description": "以宽政换民心，皇权短暂受损但叛乱风险下降。", "benefits": ["peasants", "landlords"], "costs": ["gentry"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": -6}, {"type": "resource_delta", "resource": "morale", "amount": 10}, {"type": "province_delta", "rebellionRisk": -14, "security": 3}, {"type": "faction_delta", "faction_id": "peasants", "satisfaction": 10}]},
+        {"id": "assert_mandate", "label": "斥为妖言", "description": "以铁腕压住天变议论，皇权更硬却会激怒百姓和士族。", "benefits": ["military"], "costs": ["peasants", "gentry"], "effects": [{"type": "resource_delta", "resource": "authority", "amount": 8}, {"type": "resource_delta", "resource": "morale", "amount": -8}, {"type": "province_delta", "rebellionRisk": 12}, {"type": "faction_delta", "faction_id": "gentry", "satisfaction": -6, "resentment": 10}]}
+      ]
+    }
   ]
 }
