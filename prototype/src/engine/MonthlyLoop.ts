@@ -15,6 +15,7 @@ import {
   type ResourceDelta,
 } from "./Buildings";
 import { drawMonthlyEvent, type MonthlyEventResult } from "./EventEngine";
+import { calculateSurvivalPressure } from "./SurvivalPressure";
 
 export function formatReignDate(state: Pick<GameState, "time" | "emperor">): string {
   const yearLabel = state.time.year === 1 ? "元" : String(state.time.year);
@@ -71,7 +72,6 @@ function productionFactor(province: ProvinceState): number {
   );
 }
 
-/** Central collection efficiency derived from authority, loyalty and corruption. */
 export function centralCollectionEfficiency(state: Pick<GameState, "resources" | "provinces">): number {
   const value = 0.28
     + state.resources.authority / 220
@@ -86,14 +86,11 @@ export interface ProvinceProduction {
   treasury: number;
 }
 
-/** Calculate gross local production before central taxes are collected. */
 export function calculateProvinceProduction(state: Pick<GameState, "provinces">): ProvinceProduction[] {
   return state.provinces.map((province) => {
     const factor = productionFactor(province);
     return {
       provinceId: province.id,
-      // Population and the province's historical food/treasury ratings are in
-      // compact prototype units, so these yields remain readable stockpiles.
       food: Math.max(0, Math.round(province.population * 7 * factor)),
       treasury: Math.max(0, Math.round(province.treasury * 10 * factor)),
     };
@@ -142,8 +139,6 @@ function updateFactions(factions: FactionState[], shortages: string[]): {
 function updateProvinces(provinces: ProvinceState[], shortages: string[]): ProvinceState[] {
   return provinces.map((province) => {
     const next = { ...province };
-    // Corruption naturally grows very slowly; high loyalty and security keep
-    // the leak contained, while a shortage makes every local problem sharper.
     next.corruption = clamp(next.corruption + (next.corruption > 55 ? 0.4 : 0.1));
     if (shortages.includes("food")) {
       next.morale = clamp(next.morale - 2);
@@ -166,11 +161,6 @@ export interface MonthlyEconomyResult {
   collectionEfficiency: number;
 }
 
-/**
- * Settle local production, central collection, building yields and national
- * upkeep. Missing food or silver is deliberately converted into political and
- * provincial damage rather than an immediate game over.
- */
 export function settleMonthlyEconomyDetailed(state: GameState): MonthlyEconomyResult {
   const provincialProduction = calculateProvinceProduction(state);
   const collectionEfficiency = centralCollectionEfficiency(state);
@@ -187,12 +177,14 @@ export function settleMonthlyEconomyDetailed(state: GameState): MonthlyEconomyRe
     requested[resource] = (requested[resource] ?? 0) + (value ?? 0);
   }
 
-  // Army upkeep is proportional to the force, with a separate payroll and an
-  // administration bill. This keeps a large army powerful but never free.
-  requested.food = (requested.food ?? 0) - Math.ceil(state.resources.army * 0.05);
-  requested.treasury = (requested.treasury ?? 0)
-    - Math.ceil(state.resources.army * 0.02)
-    - (300 + state.provinces.length * 90 + Math.round(average(state.provinces, "corruption") * 2));
+  // V0.5 survival pressure is applied in the same settlement pass so there is
+  // one authoritative monthly economy. This prevents the balancing layer from
+  // becoming a disconnected calculation that the actual game never uses.
+  const survival = calculateSurvivalPressure(state);
+  requested.food = (requested.food ?? 0) + survival.food;
+  requested.treasury = (requested.treasury ?? 0) + survival.treasury;
+  requested.manpower = (requested.manpower ?? 0) + survival.manpower;
+
   const settled = applyResourceDelta(state.resources, requested);
   const provinceState = updateProvinces(state.provinces, settled.shortages);
   const factionState = updateFactions(state.factions, settled.shortages);
@@ -208,10 +200,6 @@ export function settleMonthlyEconomyDetailed(state: GameState): MonthlyEconomyRe
   };
 }
 
-/**
- * Backwards-compatible public shape from the original prototype. New callers
- * that need province/faction diagnostics can use settleMonthlyEconomyDetailed.
- */
 export function settleMonthlyEconomy(state: GameState): {
   resources: NationalResources;
   resourceChanges: ResourceDelta;
@@ -228,7 +216,6 @@ export interface CrisisPressure {
   state_collapse: number;
 }
 
-/** Calculate pressure for each distinct route to losing the throne. */
 export function calculateCrisisPressure(state: GameState): CrisisPressure {
   const peasants = factionById(state.factions, "peasants");
   const military = factionById(state.factions, "military");
@@ -239,8 +226,6 @@ export function calculateCrisisPressure(state: GameState): CrisisPressure {
   const peasantPressure = clamp(
     Math.max(0, 44 - state.resources.morale) * 1.7
       + rebellionRisk * 0.8 * clamp((60 - state.resources.morale) / 25, 0, 1)
-      // A zero granary is dangerous only when people are already unhappy;
-      // a stable, well-governed realm can absorb a temporary stockpile dip.
       + Math.max(0, (5_000 - state.resources.food) / 100)
         * clamp((65 - state.resources.morale) / 25, 0, 1)
       + Math.max(0, 48 - security) * 0.8
@@ -294,7 +279,6 @@ function crisisTriggerFaction(type: CrisisType): FactionId | undefined {
   return undefined;
 }
 
-/** Update the persistent crisis gauge. No lethal check is made for months 1–3. */
 export function updateCrisis(state: GameState, totalMonths: number): CrisisState | null {
   if (totalMonths < 4) return state.crisis;
   const pressure = calculateCrisisPressure(state);
@@ -322,8 +306,6 @@ export function updateCrisis(state: GameState, totalMonths: number): CrisisState
   }
 
   const currentScore = pressure[state.crisis.type];
-  // Pressure rises quickly when a route is neglected, and slowly cools after
-  // the player repairs the underlying state.
   const monthlyStress = currentScore >= 20 ? (currentScore - 16) * 0.7 : -2;
   const nextPressure = clamp(state.crisis.pressure + monthlyStress);
   if (nextPressure <= 0) return null;
@@ -349,8 +331,8 @@ function createMonthHistory(
   economy: MonthlyEconomyResult,
   crisis: CrisisState | null,
 ): HistoryEntry {
-  const actions = ["州产出与中央征收已结算", "军粮、军饷与行政成本已结算"];
-  if (Object.keys(economy.resourceChanges).length > 0) actions.push("建筑产出与维护已结算");
+  const actions = ["州产出与中央征收已结算", "人口、军粮、军饷与行政成本已结算"];
+  if (Object.keys(economy.resourceChanges).length > 0) actions.push("建筑产出与维护、民力恢复已结算");
   return {
     year: state.time.year,
     month: state.time.month,
@@ -395,7 +377,6 @@ function appendMonthlyEvents(state: GameState, result: MonthlyEventResult): Game
   };
 }
 
-/** Advance one month. Optional random seed function keeps deterministic tests/replays possible. */
 export function advanceMonth(state: GameState, random?: (seed: number) => number): GameState {
   if (state.ending) return state;
   const totalMonths = state.time.totalMonths + 1;
